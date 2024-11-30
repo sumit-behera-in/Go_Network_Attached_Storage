@@ -6,21 +6,25 @@ import (
 	"sync"
 )
 
+type TCPTransportOptions struct {
+	ListenAddress string
+	HandShakeFunc HandShakerFunc
+	Decoder       Decoder
+}
+
 // always add mutex above the thing you want to protect
 
 type TCPTransport struct {
-	listenAddress string
-	listener      net.Listener
-	handShakeFunc HandShakerFunc
+	TCPTransportOptions
+	listener net.Listener
 
 	mu    sync.RWMutex
 	peers map[net.Addr]Peer
 }
 
-func NewTCPTransport(listenAddress string) *TCPTransport {
+func NewTCPTransport(opts TCPTransportOptions) *TCPTransport {
 	return &TCPTransport{
-		listenAddress: listenAddress,
-		handShakeFunc: NOPHandShakeFunc,
+		TCPTransportOptions: opts,
 	}
 }
 
@@ -30,7 +34,7 @@ func (t *TCPTransport) ListenAndAccept() error {
 	var err error
 
 	// initialize the listener
-	t.listener, err = net.Listen("tcp", t.listenAddress)
+	t.listener, err = net.Listen("tcp", t.ListenAddress)
 	if err != nil {
 		return err
 	}
@@ -60,7 +64,21 @@ func (t *TCPTransport) startAcceptLoop() {
 func (t *TCPTransport) handleConn(conn net.Conn) {
 	// create a new tcp peer
 	peer := NewTCPPeer(conn, true)
-
 	// use %+v fo more info on the parameters
 	fmt.Printf("new incoming connection %+v\n", peer)
+
+	if err := t.HandShakeFunc(peer); err != nil {
+		conn.Close()
+		fmt.Printf("Hand Shaking failed for connection: %+v \n", peer)
+		return
+	}
+
+	// Read loop
+	msg := &Temp{}
+	for {
+		// msg := buff[:n]
+		if err := t.Decoder.Decode(conn, msg); err != nil {
+			fmt.Printf("TCP error: %s\n", err.Error())
+		}
+	}
 }
