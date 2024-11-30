@@ -1,11 +1,11 @@
 package p2p
 
-// interface of remote node
+// Peer is an interface that represents the remote node
 type Peer interface {
 }
 
-// tansport is anything that handles communication
-// btn nodes in network, this can be tcp , udp , websockets ...
+// transport is anything that handles communication
+// btn nodes in network, this can be (tcp , udp , websocket ...)
 type Transport interface {
 	ListenAndAccept() error
 }

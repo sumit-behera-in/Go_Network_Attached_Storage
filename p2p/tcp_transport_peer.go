@@ -2,13 +2,13 @@ package p2p
 
 import "net"
 
-// represent the remote node over a established tcp connection
+// TCPPeer represent the remote node over a established TCP connection
 type TCPPeer struct {
-	//it is the underlying connection of the peer
+	// it is the underlying connection of the peer
 	conn net.Conn
 
-	// if we dial and retrieve a connecton => outbound = true
-	// if we accept and retrieve a connection => outound = false (inbound)
+	// if we dial and retrieve a connection => outbound = true
+	// if we accept and retrieve a connection => outbound = false (inbound)
 	outbound bool
 }
 

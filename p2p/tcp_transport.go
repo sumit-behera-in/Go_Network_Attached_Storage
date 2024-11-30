@@ -11,7 +11,7 @@ import (
 type TCPTransport struct {
 	listenAddress string
 	listener      net.Listener
-	handShakeFunc    HandShakerFunc
+	handShakeFunc HandShakerFunc
 
 	mu    sync.RWMutex
 	peers map[net.Addr]Peer
@@ -20,18 +20,17 @@ type TCPTransport struct {
 func NewTCPTransport(listenAddress string) *TCPTransport {
 	return &TCPTransport{
 		listenAddress: listenAddress,
-		handShakeFunc: func(a any) error {return nil},
+		handShakeFunc: NOPHandShakeFunc,
 	}
 }
 
-// initalize the listener and accept
+// ListenAndAccept function is used to initialize the listener and accept
 func (t *TCPTransport) ListenAndAccept() error {
 
 	var err error
 
-	// initalize the listener
+	// initialize the listener
 	t.listener, err = net.Listen("tcp", t.listenAddress)
-
 	if err != nil {
 		return err
 	}
@@ -42,15 +41,14 @@ func (t *TCPTransport) ListenAndAccept() error {
 
 }
 
-// accept connetions asynchronously in a infinite loop
-
+// accept connections asynchronously in a infinite loop
 func (t *TCPTransport) startAcceptLoop() {
 	for {
-		// accept from the listner
+		// accept from the listener
 		conn, err := t.listener.Accept()
 
 		if err != nil {
-			fmt.Printf("Tcp accept error: %v\n", err)
+			fmt.Printf("Tcp accept error: %s\n", err)
 		}
 
 		go t.handleConn(conn)
@@ -63,5 +61,6 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 	// create a new tcp peer
 	peer := NewTCPPeer(conn, true)
 
-	fmt.Println("new incoming connection", peer)
+	// use %+v fo more info on the parameters
+	fmt.Printf("new incoming connection %+v\n", peer)
 }
