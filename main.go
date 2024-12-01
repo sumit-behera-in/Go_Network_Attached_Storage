@@ -1,16 +1,22 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/sumit-behera-in/Distributed_File_Storage_GO/p2p"
 )
+
+func onPeer(p p2p.Peer) error {
+	return errors.New("on peer failed")
+}
 
 func main() {
 	tcpOpts := p2p.TCPTransportOptions{
 		ListenAddress: ":3000",
 		HandShakeFunc: p2p.NOPHandShakeFunc,
 		Decoder:       &p2p.DefaultDecoder{},
+		OnPeer:        onPeer,
 	}
 	tr := p2p.NewTCPTransport(tcpOpts)
 

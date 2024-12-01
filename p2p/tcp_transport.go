@@ -3,14 +3,7 @@ package p2p
 import (
 	"fmt"
 	"net"
-	"sync"
 )
-
-type TCPTransportOptions struct {
-	ListenAddress string
-	HandShakeFunc HandShakerFunc
-	Decoder       Decoder
-}
 
 // always add mutex above the thing you want to protect
 
@@ -18,9 +11,6 @@ type TCPTransport struct {
 	TCPTransportOptions
 	listener     net.Listener
 	responseChan chan Response
-
-	mu    sync.RWMutex
-	peers map[net.Addr]Peer
 }
 
 func NewTCPTransport(opts TCPTransportOptions) *TCPTransport {
@@ -64,23 +54,36 @@ func (t *TCPTransport) startAcceptLoop() {
 // handle the established connection
 
 func (t *TCPTransport) handleConn(conn net.Conn) {
+	var err error
+
 	// create a new tcp peer
 	peer := NewTCPPeer(conn, true)
 	// use %+v fo more info on the parameters
 	fmt.Printf("new incoming connection %+v\n", peer)
 
-	if err := t.HandShakeFunc(peer); err != nil {
+	defer func() {
+		fmt.Printf("Dropping peer connection with error: %s\n", err.Error())
 		conn.Close()
-		fmt.Printf("Hand Shaking failed for connection: %+v \n", peer)
+	}()
+
+	if err = t.HandShakeFunc(peer); err != nil {
 		return
+	}
+
+	if t.OnPeer != nil {
+		if err = t.OnPeer(peer); err != nil {
+			return
+		}
 	}
 
 	// Read loop
 	rpc := Response{}
 	for {
 
-		if err := t.Decoder.Decode(conn, &rpc); err != nil {
-			fmt.Printf("TCP error: %s\n", err.Error())
+		err = t.Decoder.Decode(conn, &rpc)
+
+		if err != nil {
+			return
 		}
 
 		rpc.From = conn.RemoteAddr()

@@ -12,3 +12,9 @@ type Transport interface {
 	Consume() <-chan Response
 }
 
+type TCPTransportOptions struct {
+	ListenAddress string
+	HandShakeFunc HandShakerFunc
+	Decoder       Decoder
+	OnPeer        func(Peer) error
+}
