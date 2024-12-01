@@ -14,6 +14,17 @@ func main() {
 	}
 	tr := p2p.NewTCPTransport(tcpOpts)
 
+	go func() {
+
+		for {
+			println("data using channel :")
+			msg := <-tr.Consume()
+			fmt.Printf("%+v\n", msg)
+			println(":  data using channel ")
+		}
+
+	}()
+
 	if err := tr.ListenAndAccept(); err != nil {
 		panic(err.Error())
 	}

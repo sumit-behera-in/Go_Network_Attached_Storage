@@ -16,7 +16,8 @@ type TCPTransportOptions struct {
 
 type TCPTransport struct {
 	TCPTransportOptions
-	listener net.Listener
+	listener     net.Listener
+	responseChan chan Response
 
 	mu    sync.RWMutex
 	peers map[net.Addr]Peer
@@ -25,6 +26,7 @@ type TCPTransport struct {
 func NewTCPTransport(opts TCPTransportOptions) *TCPTransport {
 	return &TCPTransport{
 		TCPTransportOptions: opts,
+		responseChan:        make(chan Response),
 	}
 }
 
@@ -74,13 +76,21 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 	}
 
 	// Read loop
-	msg := &Message{}
+	rpc := Response{}
 	for {
 
-		if err := t.Decoder.Decode(conn, msg); err != nil {
+		if err := t.Decoder.Decode(conn, &rpc); err != nil {
 			fmt.Printf("TCP error: %s\n", err.Error())
 		}
 
-		fmt.Printf("Message: %+v\n", msg)
+		rpc.From = conn.RemoteAddr()
+		t.responseChan <- rpc
+		fmt.Printf("Response: %+v\n", rpc)
 	}
+}
+
+// Consume implements transporter interface, which will return read only channel for reading the incoming messages received from another peer
+func (t *TCPTransport) Consume() <-chan Response {
+	// <- is used make read only channel
+	return t.responseChan
 }

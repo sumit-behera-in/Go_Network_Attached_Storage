@@ -2,17 +2,18 @@ package p2p
 
 import (
 	"testing"
+
+	"github.com/go-playground/assert/v2"
 )
 
 func TestTCPTransport(t *testing.T) {
-	// listenAddr := ":4040"
-	// tr := NewTCPTransport(listenAddr)
+	opts := TCPTransportOptions{
+		ListenAddress: ":3000",
+		HandShakeFunc: NOPHandShakeFunc,
+		Decoder:       &DefaultDecoder{},
+	}
 
-	// assert.Equal(t, tr.listenAddress, listenAddr)
-
-	// assert.Nil(t, tr.ListenAndAccept())
-
-	// select{
-
-	// }
+	tr := NewTCPTransport(opts)
+	assert.Equal(t, tr.ListenAddress, opts.ListenAddress)
+	assert.Equal(t, tr.ListenAndAccept(), nil)
 }
