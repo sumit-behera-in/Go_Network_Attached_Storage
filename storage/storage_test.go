@@ -8,12 +8,12 @@ import (
 
 var storage = Storage{
 	StorageOptions: StorageOptions{
-		PathTransformFunc: DefaultPathTransformFunc,
+		PathTransformFunc: CASPathTransformFunc,
 	},
 }
 
 var data = bytes.NewReader([]byte("some text"))
-var key = "temp"
+var key = "user1+abc.pdf"
 
 func TestStorage_WriteStream(t *testing.T) {
 	tests := []struct {
@@ -39,21 +39,18 @@ func TestStorage_WriteStream(t *testing.T) {
 func TestStorage_PathTransformFunc(t *testing.T) {
 	tests := []struct {
 		name              string
-		key               string
 		pathTransformFunc PathTransformFunc
 		pathName          string
 		fileName          string
 	}{
 		{
 			name:              "default PathTransformFunc",
-			key:               "user1+abc.pdf",
 			pathTransformFunc: DefaultPathTransformFunc,
 			pathName:          "user1",
 			fileName:          "abc.pdf",
 		},
 		{
 			name:              "CAS PathTransformFunc",
-			key:               "user1+abc.pdf",
 			pathTransformFunc: CASPathTransformFunc,
 			pathName:          "b3daa77b\\4c04a955\\1b8781d0\\3191fe09\\8f325e67",
 			fileName:          "c7634722815d7f16a4668d0b52f3038b.pdf",
@@ -61,7 +58,7 @@ func TestStorage_PathTransformFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			path, file := tt.pathTransformFunc(tt.key)
+			path, file := tt.pathTransformFunc(key)
 			if path != tt.pathName {
 				t.Errorf("Storage.PathTransformFunc() path does not matched wantedPath = %s, gotPath = %s", tt.pathName, path)
 			}
