@@ -42,24 +42,31 @@ func TestStorage_PathTransformFunc(t *testing.T) {
 		key               string
 		pathTransformFunc PathTransformFunc
 		pathName          string
+		fileName          string
 	}{
 		{
 			name:              "default PathTransformFunc",
-			key:               "abc",
+			key:               "user1+abc.pdf",
 			pathTransformFunc: DefaultPathTransformFunc,
-			pathName:          "abc",
+			pathName:          "user1",
+			fileName:          "abc.pdf",
 		},
 		{
 			name:              "CAS PathTransformFunc",
-			key:               "abc",
+			key:               "user1+abc.pdf",
 			pathTransformFunc: CASPathTransformFunc,
-			pathName:          "a9993e36\\4706816a\\ba3e2571\\7850c26c\\9cd0d89d",
+			pathName:          "b3daa77b\\4c04a955\\1b8781d0\\3191fe09\\8f325e67",
+			fileName:          "c7634722815d7f16a4668d0b52f3038b.pdf",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if path := tt.pathTransformFunc(tt.key); path != tt.pathName {
-				t.Errorf("Storage.PathTransformFunc() path does not matched wantedPath = %v, gotPath %v", tt.pathName, path)
+			path, file := tt.pathTransformFunc(tt.key)
+			if path != tt.pathName {
+				t.Errorf("Storage.PathTransformFunc() path does not matched wantedPath = %s, gotPath = %s", tt.pathName, path)
+			}
+			if file != tt.fileName {
+				t.Errorf("Storage.PathTransformFunc() fileName does not matched wantedFileName = %s, gotFileName = %s", tt.fileName, file)
 			}
 		})
 	}
