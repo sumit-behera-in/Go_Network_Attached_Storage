@@ -42,7 +42,7 @@ test:
 # Build target
 build: test
 	@echo "Building $(APP_NAME) for OS: $(GOOS), Architecture: $(GOARCH)"
-	go build -ldflags="-s -w" -trimpath -o $(BUILD_DIR)/$(APP_NAME)$(EXT) ./cmd/
+	go build -ldflags="-s -w" -trimpath -o $(BUILD_DIR)/$(APP_NAME)$(EXT)
 
 # Clean target
 clean:
@@ -58,17 +58,20 @@ run:
 build-linux: test
 	set GOOS=linux 
 	set GOARCH=amd64 
-	go build -ldflags="-s -w" -trimpath -o $(BUILD_DIR)/$(APP_NAME)-linux ./cmd/
+	go build -ldflags="-s -w" -trimpath -o $(BUILD_DIR)/$(APP_NAME)-linux 
+	upx --best --lzma $(BUILD_DIR)/$(APP_NAME)-linux
 
 build-darwin: test
 	set GOOS=darwin 
 	set GOARCH=amd64 
-	go build -ldflags="-s -w" -trimpath -o $(BUILD_DIR)/$(APP_NAME)-darwin ./cmd/
+	go build -ldflags="-s -w" -trimpath -o $(BUILD_DIR)/$(APP_NAME)-darwin 
+	upx --best --lzma $(BUILD_DIR)/$(APP_NAME)-darwin
 
 build-windows: test
 	set GOOS=windows 
 	set GOARCH=amd64 
-	go build -ldflags="-s -w" -trimpath -o $(BUILD_DIR)/$(APP_NAME)-windows.exe ./cmd/
+	go build -ldflags="-s -w" -trimpath -o $(BUILD_DIR)/$(APP_NAME)-windows.exe 
+	upx --best --lzma $(BUILD_DIR)/$(APP_NAME)-windows.exe
 
 # Help target to list all commands
 help:
