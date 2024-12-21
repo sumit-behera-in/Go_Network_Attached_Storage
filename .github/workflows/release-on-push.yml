@@ -1,0 +1,46 @@
+name: gonas
+
+on:
+  push:
+    branches:
+      - main # Trigger on pushes to the main branch
+
+permissions:
+  contents: write # Allows pushing to repository content (for release creation)
+  id-token: write # Allows the creation of GitHub release
+  actions: write # Required for actions to push data and create releases
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    env:
+      APP_NAME: goFileCompressor # Define the application name here
+      APP_VERSION: 1.0.2 # Define the application version
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Upload pre-built compressed binaries (skip building)
+      - name: Upload compressed binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: compressed-binaries
+          path: bin/
+
+      # Step 3: Create GitHub Release
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            bin/${{ env.APP_NAME }}-linux
+            bin/${{ env.APP_NAME }}-darwin
+            bin/${{ env.APP_NAME }}-windows.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v${{ env.APP_VERSION }}
+          name: v${{ env.APP_VERSION }}
+          body: |
+            Automated release for commit ${{ github.sha }}
+          prerelease: false
