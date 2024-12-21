@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -18,6 +19,7 @@ func NewStorage(options StorageOptions) *Storage {
 	}
 }
 
+// WriteStream writes the file to the disk
 func (s *Storage) WriteStream(key string, r io.Reader) error {
 	pathName, fileName := s.PathTransformFunc(key)
 
@@ -40,4 +42,21 @@ func (s *Storage) WriteStream(key string, r io.Reader) error {
 	log.Printf("written %d bytes to disk: %s", n, pathWithFileName)
 
 	return nil
+}
+
+// ReadStream reads the file from the disk and returns the file as a io.Reader, please close the reader after using it
+func (s *Storage) ReadStream(key string) (io.Reader, error) {
+	pathName, fileName := s.PathTransformFunc(key)
+	pathWithFileName := pathName + string(filepath.Separator) + fileName
+
+	file, err := os.Open(pathWithFileName)
+	if err != nil {
+		return nil, fmt.Errorf("error while opening file %s and err: %s", fileName, err.Error())
+	}
+
+	defer file.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, file)
+	return buf, err
 }

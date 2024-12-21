@@ -12,24 +12,25 @@ var storage = Storage{
 	},
 }
 
-var data = bytes.NewReader([]byte("some text"))
-var key = "user1+abc.pdf"
+var WriteData = bytes.NewReader([]byte("some text"))
+var WriteKey = "user1+abc.pdf"
+
+var ReadData = bytes.NewReader([]byte("some text"))
+var ReadKey = "user2+abcd.pdf"
 
 func TestStorage_WriteStream(t *testing.T) {
 	tests := []struct {
 		name    string
-		r       io.Reader
 		wantErr bool
 	}{
 		{
 			name:    "write successful",
-			r:       data,
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := storage.WriteStream(key, tt.r); (err != nil) != tt.wantErr {
+			if err := storage.WriteStream(WriteKey, WriteData); (err != nil) != tt.wantErr {
 				t.Errorf("Storage.WriteStream() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -58,12 +59,46 @@ func TestStorage_PathTransformFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			path, file := tt.pathTransformFunc(key)
+			path, file := tt.pathTransformFunc(WriteKey)
 			if path != tt.pathName {
 				t.Errorf("Storage.PathTransformFunc() path does not matched wantedPath = %s, gotPath = %s", tt.pathName, path)
 			}
 			if file != tt.fileName {
 				t.Errorf("Storage.PathTransformFunc() fileName does not matched wantedFileName = %s, gotFileName = %s", tt.fileName, file)
+			}
+		})
+	}
+}
+func TestStorage_ReadStream(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{
+			name:    "read successful",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := storage.WriteStream(ReadKey, ReadData); err != nil {
+				t.Errorf("Storage.WriteStream() error = %v", err)
+			}
+
+			// Reset ReadData before reading it again
+			ReadData.Seek(0, io.SeekStart)
+
+			reader, err := storage.ReadStream(ReadKey)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Storage.ReadStream() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			r, _ := io.ReadAll(reader)
+			ReadData.Seek(0, io.SeekStart)
+			expectedData, _ := io.ReadAll(ReadData)
+
+			if !bytes.Equal(r, expectedData) {
+				t.Errorf("Storage.ReadStream() reader does not matched wantedReader = %v, gotReader = %v", expectedData, r)
 			}
 		})
 	}
