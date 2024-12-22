@@ -33,6 +33,7 @@ func TestStorage_WriteStream(t *testing.T) {
 			if err := storage.WriteStream(WriteKey, WriteData); (err != nil) != tt.wantErr {
 				t.Errorf("Storage.WriteStream() error = %v, wantErr %v", err, tt.wantErr)
 			}
+			WriteData.Seek(0, io.SeekStart)
 		})
 	}
 }
@@ -85,9 +86,6 @@ func TestStorage_ReadStream(t *testing.T) {
 				t.Errorf("Storage.WriteStream() error = %v", err)
 			}
 
-			// Reset ReadData before reading it again
-			ReadData.Seek(0, io.SeekStart)
-
 			reader, err := storage.ReadStream(ReadKey)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Storage.ReadStream() error = %v, wantErr %v", err, tt.wantErr)
@@ -103,3 +101,59 @@ func TestStorage_ReadStream(t *testing.T) {
 		})
 	}
 }
+func TestStorage_Delete(t *testing.T) {
+	tests := []struct {
+		name    string
+		key     string
+		wantErr bool
+	}{
+		{
+			name:    "delete write file",
+			key:     WriteKey,
+			wantErr: false,
+		},
+		{
+			name:    "delete non-existent file",
+			key:     "dbc+non_existent_file.txt",
+			wantErr: true,
+		}, {
+			name:    "delete read file",
+			key:     ReadKey,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := storage.Delete(tt.key); (err != nil) != tt.wantErr {
+				t.Errorf("Storage.Delete() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+func TestStorage_CleanPath(t *testing.T) {
+	tests := []struct {
+		name     string
+		path     string
+		expected bool
+	}{
+		{
+			name:     "clean path with valid path",
+			path:     "a1881c06\\eec96db9\\901c7bbf\\e41c42a3\\f08e9cb4",
+			expected: true,
+		},
+		{
+			name:     "clean path with invalid path",
+			path:     "some/invalid/path",
+			expected: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := storage.CleanPath(tt.path)
+			if result != tt.expected {
+				t.Errorf("Storage.CleanPath() = %v, expected %v", result, tt.expected)
+			}
+		})
+	}
+}
+
