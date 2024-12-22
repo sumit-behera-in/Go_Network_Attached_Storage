@@ -17,6 +17,10 @@ type Storage struct {
 }
 
 func NewStorage(options StorageOptions) *Storage {
+	if options.PathTransformFunc == nil {
+		options.PathTransformFunc = DefaultPathTransformFunc
+	}
+
 	return &Storage{
 		StorageOptions: options,
 	}
