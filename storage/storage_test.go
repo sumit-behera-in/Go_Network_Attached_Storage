@@ -54,7 +54,7 @@ func TestStorage_PathTransformFunc(t *testing.T) {
 		{
 			name:              "CAS PathTransformFunc",
 			pathTransformFunc: CASPathTransformFunc,
-			pathName:          "b3daa77b\\4c04a955\\1b8781d0\\3191fe09\\8f325e67",
+			pathName:          "b3daa77b/4c04a955/1b8781d0/3191fe09/8f325e67",
 			fileName:          "c7634722815d7f16a4668d0b52f3038b.pdf",
 		},
 	}
@@ -138,7 +138,12 @@ func TestStorage_CleanPath(t *testing.T) {
 	}{
 		{
 			name:     "clean path with valid path",
-			path:     "a1881c06\\eec96db9\\901c7bbf\\e41c42a3\\f08e9cb4",
+			path:     "a1881c06/eec96db9/901c7bbf/e41c42a3/f08e9cb4",
+			expected: true,
+		},
+		{
+			name:     "clean path with valid path",
+			path:     "b3daa77b/4c04a955/1b8781d0/3191fe09/8f325e67",
 			expected: true,
 		},
 		{
@@ -156,4 +161,3 @@ func TestStorage_CleanPath(t *testing.T) {
 		})
 	}
 }
-

@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -40,7 +39,7 @@ func (s *Storage) WriteStream(key string, r io.Reader) error {
 	if err := os.MkdirAll(pathName, os.ModePerm); err != nil {
 		return fmt.Errorf("error while creating directory %s and err: %s", pathName, err.Error())
 	}
-	pathWithFileName := pathName + string(filepath.Separator) + fileName
+	pathWithFileName := pathName + "/" + fileName
 
 	file, err := os.Create(pathWithFileName)
 	if err != nil {
@@ -68,7 +67,7 @@ func (s *Storage) ReadStream(key string) (io.Reader, error) {
 	defer mutex.Unlock()
 
 	pathName, fileName := s.PathTransformFunc(key)
-	pathWithFileName := pathName + string(filepath.Separator) + fileName
+	pathWithFileName := pathName + "/" + fileName
 
 	file, err := os.Open(pathWithFileName)
 	if err != nil {
@@ -87,7 +86,7 @@ func (s *Storage) ReadStream(key string) (io.Reader, error) {
 
 func (s *Storage) Has(key string) bool {
 	pathName, fileName := s.PathTransformFunc(key)
-	pathWithFileName := pathName + string(filepath.Separator) + fileName
+	pathWithFileName := pathName + "/" + fileName
 
 	log.Printf("Checking existence of file: %s", pathWithFileName)
 
@@ -106,7 +105,7 @@ func (s *Storage) Delete(key string) error {
 	}
 
 	pathName, fileName := s.PathTransformFunc(key)
-	pathWithFileName := pathName + string(filepath.Separator) + fileName
+	pathWithFileName := pathName + "/" + fileName
 
 	err := os.Remove(pathWithFileName)
 	if err != nil {
@@ -121,6 +120,6 @@ func (s *Storage) Delete(key string) error {
 }
 
 func (s *Storage) CleanPath(path string) bool {
-	paths := strings.Split(path, string(filepath.Separator))
+	paths := strings.Split(path, "/")
 	return RecursiveClean(0, "", &paths)
 }

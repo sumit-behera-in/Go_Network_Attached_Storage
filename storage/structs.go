@@ -42,5 +42,5 @@ var CASPathTransformFunc = func(key string) (string, string) {
 	fileNameBytes := md5.Sum([]byte(fileName))
 	fileName = hex.EncodeToString(fileNameBytes[:])
 
-	return strings.Join(paths, string(filepath.Separator)), fileName + fileExt
+	return strings.Join(paths, "/"), fileName + fileExt
 }
