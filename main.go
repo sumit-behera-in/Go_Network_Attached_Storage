@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/sumit-behera-in/Distributed_File_Storage_GO/p2p"
+	"github.com/sumit-behera-in/gonas/p2p"
 )
 
 func onPeer(p p2p.Peer) error {

@@ -1,4 +1,4 @@
-name: gonas
+name: release-on-push
 
 on:
   push:
@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      APP_NAME: goFileCompressor # Define the application name here
-      APP_VERSION: 1.0.2 # Define the application version
+      APP_NAME: gonas # Define the application name here
+      APP_VERSION: 1.1.0 # Define the application version
 
     steps:
       # Step 1: Checkout the code
