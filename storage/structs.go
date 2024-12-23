@@ -6,14 +6,19 @@ import (
 	"encoding/hex"
 	"path/filepath"
 	"strings"
+
+	"github.com/sumit-behera-in/goLogger"
 )
 
 type PathTransformFunc func(string) (string, string)
 
 type StorageOptions struct {
 	PathTransformFunc PathTransformFunc
+	Logger            *goLogger.Logger
 }
 
+// DefaultPathTransformFunc is the default path transform function, which splits the key by "+" 
+// and returns the first part as path and the second part as file name
 var DefaultPathTransformFunc = func(key string) (string, string) {
 	keyContains := strings.Split(key, "+")
 	userDetails := keyContains[0]
@@ -21,6 +26,19 @@ var DefaultPathTransformFunc = func(key string) (string, string) {
 	return userDetails, fileName
 }
 
+// CASPathTransformFunc is a content-addressable storage (CAS) path transform function.
+// It takes a key in the format "userDetails+fileName", where userDetails is a string
+// representing user-specific information and fileName is the name of the file.
+//
+// The function performs the following transformations:
+// 1. Splits the key by "+" to separate userDetails and fileName.
+// 2. Computes the SHA-1 hash of the userDetails and encodes it as a hexadecimal string.
+// 3. Divides the hash string into equal-sized blocks and constructs a path by joining these blocks with "/".
+// 4. Computes the MD5 hash of the fileName and encodes it as a hexadecimal string.
+// 5. Returns the constructed path and the encoded file name with its original extension.
+//
+// This function is useful for generating unique and consistent paths for storing files
+// in a content-addressable storage system.
 var CASPathTransformFunc = func(key string) (string, string) {
 	keyContains := strings.Split(key, "+")
 	userDetails := keyContains[0]
