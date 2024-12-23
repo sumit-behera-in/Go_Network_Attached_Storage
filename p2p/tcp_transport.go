@@ -29,7 +29,6 @@ func (t *TCPTransport) ListenAndAccept() error {
 	// initialize the listener
 	t.listener, err = net.Listen("tcp", t.ListenAddress)
 	if err != nil {
-		t.Logger.Errorf("TCP failed to listen on %s: %s", t.ListenAddress, err)
 		return err
 	}
 
