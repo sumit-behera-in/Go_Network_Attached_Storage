@@ -13,12 +13,14 @@ type Decoder interface {
 
 type GOBDecoder struct{}
 
+// Decode decodes the incoming data using the GOB decoder
 func (dec *GOBDecoder) Decode(r io.Reader, rpc *Response) error {
 	return gob.NewDecoder(r).Decode(rpc)
 }
 
 type DefaultDecoder struct{}
 
+// Decode decodes the incoming data using the default decoder, i.e. the custom decoder
 func (dec *DefaultDecoder) Decode(r io.Reader, rpc *Response) error {
 	var buf bytes.Buffer // Use bytes.Buffer to accumulate the data
 	temp := make([]byte, 1024)
