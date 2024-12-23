@@ -4,11 +4,16 @@ import (
 	"bytes"
 	"io"
 	"testing"
+
+	"github.com/sumit-behera-in/goLogger"
 )
+
+var logger, _ = goLogger.NewLogger("test", "")
 
 var storage = Storage{
 	StorageOptions: StorageOptions{
 		PathTransformFunc: CASPathTransformFunc,
+		Logger:            logger,
 	},
 }
 
