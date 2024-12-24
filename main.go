@@ -1,18 +1,17 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/sumit-behera-in/goLogger"
+	fileserver "github.com/sumit-behera-in/gonas/fileServer"
 	"github.com/sumit-behera-in/gonas/p2p"
+	"github.com/sumit-behera-in/gonas/storage"
 )
 
 var logger *goLogger.Logger
 
 func init() {
 	var err error
-	logger, err = goLogger.NewLogger("gonas", "./log", 1000, 5, "IST")
+	logger, err = goLogger.NewLogger("gonas", "./log", 1, 4, "IST")
 	if err != nil {
 		panic("Failed to create logger instance : " + err.Error())
 	}
@@ -20,36 +19,30 @@ func init() {
 
 func main() {
 	logger.Info("Starting the application...")
+	defer logger.Close()
 
-	tcpOpts := p2p.TCPTransportOptions{
-		ListenAddress: ":3000",
-		HandShakeFunc: p2p.NOPHandShakeFunc,
-		Decoder:       &p2p.DefaultDecoder{},
-		OnPeer:        onPeer,
+	tcpTransportOpts := p2p.TCPTransportOptions{
 		Logger:        logger,
-	}
-	tr := p2p.NewTCPTransport(tcpOpts)
-
-	go func() {
-
-		for {
-			println("data using channel :")
-			msg := <-tr.Consume()
-			fmt.Printf("%+v\n", msg)
-			println(":  data using channel ")
-		}
-
-	}()
-
-	if err := tr.ListenAndAccept(); err != nil {
-		panic(err.Error())
+		ListenAddress: ":1000",
+		HandShakeFunc: p2p.NOPHandShakeFunc,
+		Decoder:       &p2p.GOBDecoder{},
+		// TODO: onPeer func
 	}
 
-	fmt.Println("HEllo")
+	tcpTransport := p2p.NewTCPTransport(tcpTransportOpts)
+
+	fileServerOptions := fileserver.FileServerOpts{
+		Logger:            logger,
+		StorageRoot:       "NAS_1000_root",
+		PathTransformFunc: storage.CASPathTransformFunc,
+		Transport:         tcpTransport,
+	}
+
+	fileServer := fileserver.NewFileServer(fileServerOptions)
+
+	if err := fileServer.Start(); err !=  nil {
+		logger.Fatal(err.Error())
+	}
 
 	select {}
-}
-
-func onPeer(p p2p.Peer) error {
-	return errors.New("on peer failed")
 }
