@@ -8,7 +8,7 @@ import (
 	"github.com/sumit-behera-in/goLogger"
 )
 
-var logger, _ = goLogger.NewLogger("test", "")
+var logger, _ = goLogger.NewLogger("test", "", 100, 2, "IST")
 
 var storage = Storage{
 	StorageOptions: StorageOptions{

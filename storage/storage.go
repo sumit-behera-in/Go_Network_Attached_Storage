@@ -163,7 +163,7 @@ func (s *Storage) recursiveClean(i int, path string, paths *[]string) bool {
 	path += "/" + (*paths)[i]
 
 	// Log the current path being processed
-	s.Logger.Infof("RecursiveClean with Path: %s\n", path)
+	s.Logger.Infof("RecursiveClean with Path: %s", path)
 
 	// First, process the next level of subdirectories (recursively).
 	if !s.recursiveClean(i+1, path, paths) {
@@ -173,23 +173,23 @@ func (s *Storage) recursiveClean(i int, path string, paths *[]string) bool {
 	// Now, check if the current directory is empty by reading its contents.
 	dirContents, err := os.ReadDir(path[1:])
 	if err != nil {
-		s.Logger.Warnf("Failed to read directory %s: %v\n", path, err)
+		s.Logger.Warnf("Failed to read directory %s: %v", path, err)
 		return false
 	}
 
 	// If the directory is not empty, don't remove it.
 	if len(dirContents) > 0 {
-		s.Logger.Warnf("Directory %s is not empty. Skipping removal.\n", path)
+		s.Logger.Warnf("Directory %s is not empty. Skipping removal.", path)
 		return true
 	}
 
 	// If the directory is empty, remove it.
 	if err = os.RemoveAll(path[1:]); err == nil {
-		s.Logger.Warnf("Failed to remove directory %s: %v\n", path, err)
+		s.Logger.Warnf("Failed to remove directory %s: %v", path, err)
 		return true
 	}
 
 	// Log successful deletion.
-	s.Logger.Infof("Directory %s is empty, deleting\n", path)
+	s.Logger.Infof("Directory %s is empty, deleting", path)
 	return false
 }
