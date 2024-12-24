@@ -8,7 +8,7 @@ import (
 )
 
 func TestTCPTransport(t *testing.T) {
-	logger , _  := goLogger.NewLogger("test", "")
+	logger, _ := goLogger.NewLogger("test", "", 1000, 2, "IST")
 	opts := TCPTransportOptions{
 		ListenAddress: ":3000",
 		HandShakeFunc: NOPHandShakeFunc,

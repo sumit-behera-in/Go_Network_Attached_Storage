@@ -12,7 +12,7 @@ var logger *goLogger.Logger
 
 func init() {
 	var err error
-	logger, err = goLogger.NewLogger("gonas", "log.log")
+	logger, err = goLogger.NewLogger("gonas", "./log", 1000, 5, "IST")
 	if err != nil {
 		panic("Failed to create logger instance : " + err.Error())
 	}

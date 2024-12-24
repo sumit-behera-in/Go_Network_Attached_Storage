@@ -68,7 +68,7 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 	t.Logger.Infof("New incoming TCP connection %+v", peer)
 
 	defer func() {
-		t.Logger.Errorf("Dropping peer connection with error: %s\n", err.Error())
+		t.Logger.Errorf("Dropping peer connection with error: %s", err.Error())
 		conn.Close()
 	}()
 
@@ -96,7 +96,7 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 
 		rpc.From = conn.RemoteAddr()
 		t.responseChan <- rpc
-		t.Logger.Infof("Response: %+v\n", rpc)
+		t.Logger.Infof("Response: %+v", rpc)
 	}
 }
 
