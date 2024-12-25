@@ -2,6 +2,7 @@ package fileserver
 
 import (
 	"io"
+	"sync"
 
 	"github.com/sumit-behera-in/goLogger"
 	"github.com/sumit-behera-in/gonas/p2p"
@@ -13,13 +14,17 @@ type FileServerOpts struct {
 	StorageRoot       string                    // root storage to store all files or folders managed by goNAS
 	PathTransformFunc storage.PathTransformFunc // used encrypt path and file name
 	Transport         p2p.Transport             // TCP, UDP, HTTP
+	BootStrapNodes    []string
 }
 
 type Fileserver struct {
 	FileServerOpts
-	storage        storage.Storage
-	quitChan       chan struct{}
-	BootStrapNodes []string
+
+	peerLock sync.Mutex
+	peers    map[string]p2p.Peer
+
+	storage  storage.Storage
+	quitChan chan struct{}
 }
 
 func NewFileServer(option FileServerOpts) *Fileserver {
@@ -31,6 +36,7 @@ func NewFileServer(option FileServerOpts) *Fileserver {
 		FileServerOpts: option,
 		storage:        *storage.NewStorage(storageOpts),
 		quitChan:       make(chan struct{}),
+		peers:          make(map[string]p2p.Peer),
 	}
 }
 
@@ -65,6 +71,10 @@ func (server *Fileserver) Start() error {
 	return nil
 }
 
+func StoreData(key string, r io.Reader) error {
+	return nil
+}
+
 func (server *Fileserver) Stop() {
 	close(server.quitChan)
 	server.Logger.Info("Fileserver is closed by calling Stop() function")
@@ -83,4 +93,12 @@ func (server *Fileserver) bootstrapNetwork() {
 			}
 		}()
 	}
+}
+
+func (server *Fileserver) OnPeer(p p2p.Peer) error {
+	server.peerLock.Lock()
+	defer server.peerLock.Unlock()
+	server.peers[p.RemoteAddress().String()] = p
+	server.Logger.Infof("connected with remote %s", p.RemoteAddress().String())
+	return nil
 }
