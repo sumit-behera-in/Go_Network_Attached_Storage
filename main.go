@@ -45,10 +45,9 @@ func main() {
 	go func() {
 		time.Sleep(time.Second * 3)
 		fileServer.Stop()
-	}()	
-
+	}()
+	
 	if err := fileServer.Start(); err != nil {
 		logger.Fatal(err.Error())
 	}
-
 }
