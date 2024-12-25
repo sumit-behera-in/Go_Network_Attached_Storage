@@ -105,3 +105,8 @@ func (t *TCPTransport) Consume() <-chan Response {
 	// <- is used make read only channel
 	return t.responseChan
 }
+
+// Close , closes the tcp listener
+func (t *TCPTransport) Close() error {
+	return t.listener.Close()
+}

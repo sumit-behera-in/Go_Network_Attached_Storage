@@ -1,8 +1,10 @@
 package main
 
 import (
+	"time"
+
 	"github.com/sumit-behera-in/goLogger"
-	fileserver "github.com/sumit-behera-in/gonas/fileServer"
+	"github.com/sumit-behera-in/gonas/fileserver"
 	"github.com/sumit-behera-in/gonas/p2p"
 	"github.com/sumit-behera-in/gonas/storage"
 )
@@ -11,7 +13,7 @@ var logger *goLogger.Logger
 
 func init() {
 	var err error
-	logger, err = goLogger.NewLogger("gonas", "./log", 1, 4, "IST")
+	logger, err = goLogger.NewLogger("gonas", "", 100, 4, "IST")
 	if err != nil {
 		panic("Failed to create logger instance : " + err.Error())
 	}
@@ -40,9 +42,13 @@ func main() {
 
 	fileServer := fileserver.NewFileServer(fileServerOptions)
 
-	if err := fileServer.Start(); err !=  nil {
+	go func() {
+		time.Sleep(time.Second * 3)
+		fileServer.Stop()
+	}()	
+
+	if err := fileServer.Start(); err != nil {
 		logger.Fatal(err.Error())
 	}
 
-	select {}
 }

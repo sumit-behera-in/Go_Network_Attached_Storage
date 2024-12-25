@@ -12,6 +12,7 @@ type Peer interface {
 type Transport interface {
 	ListenAndAccept() error   // ListenAndAccept is the function that is used to start the transport
 	Consume() <-chan Response // Consume is the function that is used to consume the incoming data
+	Close() error             // Close is the function that is used to stop the transport
 }
 
 type TCPTransportOptions struct {
