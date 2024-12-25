@@ -19,6 +19,19 @@ func NewTCPTransport(opts TCPTransportOptions) *TCPTransport {
 	}
 }
 
+// Dial implements the Transport interface, It is used to create outbound connections
+func (t *TCPTransport) Dial(address string) error {
+	con, err := net.Dial("tcp", address)
+	if err != nil {
+		t.Logger.Errorf("TCP Dial failed for address : %s", address)
+		return err
+	}
+
+	go t.handleConn(con, true)
+
+	return nil
+}
+
 // ListenAndAccept function is used to initialize the listener and accept
 func (t *TCPTransport) ListenAndAccept() error {
 
@@ -57,16 +70,16 @@ func (t *TCPTransport) startAcceptLoop() {
 
 		t.Logger.Infof("Accepted TCP connection from %s", conn.RemoteAddr())
 
-		go t.handleConn(conn)
+		go t.handleConn(conn, false)
 	}
 }
 
 // handle the established connection
 
-func (t *TCPTransport) handleConn(conn net.Conn) {
+func (t *TCPTransport) handleConn(conn net.Conn, outbound bool) {
 	var err error
 	// create a new tcp peer
-	peer := NewTCPPeer(conn, true)
+	peer := NewTCPPeer(conn, outbound)
 	// use %+v fo more info on the parameters
 	t.Logger.Infof("New incoming TCP connection %+v", peer)
 
