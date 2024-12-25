@@ -1,9 +1,15 @@
 package p2p
 
-import "github.com/sumit-behera-in/goLogger"
+import (
+	"net"
+
+	"github.com/sumit-behera-in/goLogger"
+)
 
 // Peer is an interface that represents the remote node
 type Peer interface {
+	Send([]byte) error
+	RemoteAddress() net.Addr
 	Close() error // Close is the function that is used to close the connection
 }
 
