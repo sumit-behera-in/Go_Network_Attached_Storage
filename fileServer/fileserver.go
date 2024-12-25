@@ -17,8 +17,9 @@ type FileServerOpts struct {
 
 type Fileserver struct {
 	FileServerOpts
-	storage  storage.Storage
-	quitChan chan struct{}
+	storage        storage.Storage
+	quitChan       chan struct{}
+	BootStrapNodes []string
 }
 
 func NewFileServer(option FileServerOpts) *Fileserver {
@@ -57,6 +58,8 @@ func (server *Fileserver) Start() error {
 		return err
 	}
 
+	server.bootstrapNetwork()
+
 	server.keepAlive()
 
 	return nil
@@ -70,4 +73,14 @@ func (server *Fileserver) Stop() {
 
 func (server *Fileserver) Store(key string, r io.Reader) error {
 	return server.storage.WriteStream(key, r)
+}
+
+func (server *Fileserver) bootstrapNetwork() {
+	for _, address := range server.BootStrapNodes {
+		go func() {
+			if err := server.Transport.Dial(address); err != nil {
+				server.Logger.Errorf("BootStrapping failed for address : %s", address)
+			}
+		}()
+	}
 }

@@ -10,6 +10,7 @@ type Peer interface {
 // transport is anything that handles communication
 // btn nodes in network, this can be (tcp , udp , websocket ...)
 type Transport interface {
+	Dial(string) error
 	ListenAndAccept() error   // ListenAndAccept is the function that is used to start the transport
 	Consume() <-chan Response // Consume is the function that is used to consume the incoming data
 	Close() error             // Close is the function that is used to stop the transport
