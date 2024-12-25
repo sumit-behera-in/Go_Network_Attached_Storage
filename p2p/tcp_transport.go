@@ -48,6 +48,9 @@ func (t *TCPTransport) startAcceptLoop() {
 	for {
 		// accept from the listener
 		conn, err := t.listener.Accept()
+		if err == net.ErrClosed {
+			return
+		}
 		if err != nil {
 			t.Logger.Errorf("Tcp accept error: %s", err)
 		}
@@ -108,5 +111,7 @@ func (t *TCPTransport) Consume() <-chan Response {
 
 // Close , closes the tcp listener
 func (t *TCPTransport) Close() error {
+	t.Logger.Infof("Dropping TCP connection with %s", t.ListenAddress)
+	t.Logger.Close()
 	return t.listener.Close()
 }

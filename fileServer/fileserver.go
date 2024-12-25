@@ -37,8 +37,8 @@ func (server *Fileserver) keepAlive() {
 	server.Logger.Info("File Server KeepAlive() is called")
 
 	defer func() {
-		server.Transport.Close()
 		server.Logger.Info("File Server KeepAlive() is stopped")
+		server.Transport.Close()
 	}()
 
 	for {
