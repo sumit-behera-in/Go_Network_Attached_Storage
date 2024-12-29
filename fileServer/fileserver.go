@@ -1,21 +1,14 @@
 package fileserver
 
 import (
+	"bytes"
+	"encoding/gob"
 	"io"
 	"sync"
 
-	"github.com/sumit-behera-in/goLogger"
 	"github.com/sumit-behera-in/gonas/p2p"
 	"github.com/sumit-behera-in/gonas/storage"
 )
-
-type FileServerOpts struct {
-	Logger            *goLogger.Logger          // this is the global logger
-	StorageRoot       string                    // root storage to store all files or folders managed by goNAS
-	PathTransformFunc storage.PathTransformFunc // used encrypt path and file name
-	Transport         p2p.Transport             // TCP, UDP, HTTP
-	BootStrapNodes    []string
-}
 
 type Fileserver struct {
 	FileServerOpts
@@ -52,6 +45,10 @@ func (server *Fileserver) keepAlive() {
 		select {
 		case msg := <-server.Transport.Consume():
 			server.Logger.Infof("%+v", msg)
+			p := Payload{}
+			if err := gob.NewDecoder(bytes.NewReader(msg.Payload)).Decode(&p); err != nil {
+				server.Logger.Fatal("Decoding failed")
+			}
 		case <-server.quitChan:
 			return
 		}
@@ -82,7 +79,18 @@ func (server *Fileserver) Stop() {
 }
 
 func (server *Fileserver) Store(key string, r io.Reader) error {
-	return server.storage.WriteStream(key, r)
+	buff := new(bytes.Buffer)
+	tee := io.TeeReader(r, buff)
+	if err := server.storage.WriteStream(key, tee); err != nil {
+		return err
+	}
+
+	p := &Payload{
+		Key:  key,
+		Data: buff.Bytes(),
+	}
+
+	return server.broadcast(p)
 }
 
 func (server *Fileserver) bootstrapNetwork() {
@@ -98,7 +106,17 @@ func (server *Fileserver) bootstrapNetwork() {
 func (server *Fileserver) OnPeer(p p2p.Peer) error {
 	server.peerLock.Lock()
 	defer server.peerLock.Unlock()
-	server.peers[p.RemoteAddress().String()] = p
-	server.Logger.Infof("connected with remote %s", p.RemoteAddress().String())
+	server.peers[p.RemoteAddr().String()] = p
+	server.Logger.Infof("connected with remote %s", p.RemoteAddr().String())
 	return nil
+}
+
+func (server *Fileserver) broadcast(p *Payload) error {
+	peers := []io.Writer{} // peer contains net.conn which contains reader and writer so it is compatible with it.
+	for _, peer := range server.peers {
+		peers = append(peers, peer)
+	}
+
+	multiWriter := io.MultiWriter(peers...)
+	return gob.NewEncoder(multiWriter).Encode(p)
 }
