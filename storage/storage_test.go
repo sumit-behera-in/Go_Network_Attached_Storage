@@ -14,6 +14,7 @@ var storage = Storage{
 	StorageOptions: StorageOptions{
 		PathTransformFunc: CASPathTransformFunc,
 		Logger:            logger,
+		StorageRoot:       "test",
 	},
 }
 
@@ -53,19 +54,19 @@ func TestStorage_PathTransformFunc(t *testing.T) {
 		{
 			name:              "default PathTransformFunc",
 			pathTransformFunc: DefaultPathTransformFunc,
-			pathName:          "user1",
+			pathName:          "test/user1",
 			fileName:          "abc.pdf",
 		},
 		{
 			name:              "CAS PathTransformFunc",
 			pathTransformFunc: CASPathTransformFunc,
-			pathName:          "b3daa77b/4c04a955/1b8781d0/3191fe09/8f325e67",
+			pathName:          "test/b3daa77b/4c04a955/1b8781d0/3191fe09/8f325e67",
 			fileName:          "c7634722815d7f16a4668d0b52f3038b.pdf",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			path, file := tt.pathTransformFunc(WriteKey)
+			path, file := tt.pathTransformFunc("test", WriteKey)
 			if path != tt.pathName {
 				t.Errorf("Storage.PathTransformFunc() path does not matched wantedPath = %s, gotPath = %s", tt.pathName, path)
 			}
@@ -143,12 +144,12 @@ func TestStorage_CleanPath(t *testing.T) {
 	}{
 		{
 			name:     "clean path with valid path",
-			path:     "a1881c06/eec96db9/901c7bbf/e41c42a3/f08e9cb4",
+			path:     "test/a1881c06/eec96db9/901c7bbf/e41c42a3/f08e9cb4",
 			expected: true,
 		},
 		{
 			name:     "clean path with valid path",
-			path:     "b3daa77b/4c04a955/1b8781d0/3191fe09/8f325e67",
+			path:     "test/b3daa77b/4c04a955/1b8781d0/3191fe09/8f325e67",
 			expected: true,
 		},
 		{

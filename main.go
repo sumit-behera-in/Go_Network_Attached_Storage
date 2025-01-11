@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"time"
+
 	"github.com/sumit-behera-in/goLogger"
 	"github.com/sumit-behera-in/gonas/fileserver"
 	"github.com/sumit-behera-in/gonas/p2p"
@@ -22,24 +25,23 @@ func main() {
 
 	fileServer1 := makeServer(":1000", "NAS_1000_root", ":2000", ":3000", ":4000")
 	fs2 := makeServer(":2000", "NAS_2000_root", ":1000", ":3000", ":4000")
-	fs3 := makeServer(":3000", "NAS_2000_root", ":1000", ":2000", ":4000")
-	fs4 := makeServer(":4000", "NAS_2000_root", ":1000", ":3000", ":2000")
+	// fs3 := makeServer(":3000", "NAS_3000_root", ":1000", ":2000", ":4000")
+	// fs4 := makeServer(":4000", "NAS_4000_root", ":1000", ":3000", ":2000")
 
 	go func() {
 		fileServer1.Start()
 	}()
 
+	time.Sleep(5 * time.Second)
+
 	go func() {
 		fs2.Start()
 	}()
 
-	go func() {
-		fs3.Start()
-	}()
+	time.Sleep(5 * time.Second)
 
-	go func() {
-		fs4.Start()
-	}()
+	data := bytes.NewReader([]byte("Hello"))
+	fs2.Store("abs+c.pdf", data)
 
 	select {}
 

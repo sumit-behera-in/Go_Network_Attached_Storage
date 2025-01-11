@@ -7,8 +7,8 @@ import (
 // TCPTransport represents the TCP transport layer for handling peer-to-peer communication.
 type TCPTransport struct {
 	TCPTransportOptions
-	listener     net.Listener    // Listener for accepting incoming TCP connections.
-	responseChan chan Response   // Channel for receiving responses from remote peers.
+	listener     net.Listener  // Listener for accepting incoming TCP connections.
+	responseChan chan Response // Channel for receiving responses from remote peers.
 }
 
 // NewTCPTransport creates a new TCPTransport instance with the given options.
@@ -145,6 +145,9 @@ func (t *TCPTransport) Consume() <-chan Response {
 // Returns an error if there is an issue closing the listener.
 func (t *TCPTransport) Close() error {
 	t.Logger.Infof("Dropping TCP connection with %s", t.ListenAddress)
-	t.Logger.Close()  // Close the logger
 	return t.listener.Close() // Close the TCP listener
+}
+
+func (t *TCPTransport) ListenAddr() string {
+	return t.ListenAddress
 }
