@@ -15,7 +15,7 @@ var logger *goLogger.Logger
 func init() {
 	var err error
 	logger, err = goLogger.NewLogger("gonas", "", 10, 4, "IST")
-	if err != nil {
+	if err != nil {	
 		panic("Failed to create logger instance : " + err.Error())
 	}
 }
