@@ -10,20 +10,21 @@ import (
 	"github.com/sumit-behera-in/goLogger"
 )
 
-type PathTransformFunc func(string) (string, string)
+type PathTransformFunc func(string, string) (string, string)
 
 type StorageOptions struct {
+	StorageRoot       string
 	PathTransformFunc PathTransformFunc
 	Logger            *goLogger.Logger
 }
 
-// DefaultPathTransformFunc is the default path transform function, which splits the key by "+" 
+// DefaultPathTransformFunc is the default path transform function, which splits the key by "+"
 // and returns the first part as path and the second part as file name
-var DefaultPathTransformFunc = func(key string) (string, string) {
+var DefaultPathTransformFunc = func(storageRoot string, key string) (string, string) {
 	keyContains := strings.Split(key, "+")
 	userDetails := keyContains[0]
 	fileName := keyContains[1]
-	return userDetails, fileName
+	return storageRoot + "/" + userDetails, fileName
 }
 
 // CASPathTransformFunc is a content-addressable storage (CAS) path transform function.
@@ -39,7 +40,7 @@ var DefaultPathTransformFunc = func(key string) (string, string) {
 //
 // This function is useful for generating unique and consistent paths for storing files
 // in a content-addressable storage system.
-var CASPathTransformFunc = func(key string) (string, string) {
+var CASPathTransformFunc = func(storageRoot string, key string) (string, string) {
 	keyContains := strings.Split(key, "+")
 	userDetails := keyContains[0]
 	fileExt := filepath.Ext(keyContains[1])
@@ -60,5 +61,5 @@ var CASPathTransformFunc = func(key string) (string, string) {
 	fileNameBytes := md5.Sum([]byte(fileName))
 	fileName = hex.EncodeToString(fileNameBytes[:])
 
-	return strings.Join(paths, "/"), fileName + fileExt
+	return storageRoot + "/" + strings.Join(paths, "/"), fileName + fileExt
 }

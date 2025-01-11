@@ -23,6 +23,8 @@ type Fileserver struct {
 func NewFileServer(option FileServerOpts) *Fileserver {
 	storageOpts := storage.StorageOptions{
 		PathTransformFunc: option.PathTransformFunc,
+		Logger:            option.Logger,
+		StorageRoot:       option.StorageRoot,
 	}
 
 	return &Fileserver{
@@ -31,6 +33,14 @@ func NewFileServer(option FileServerOpts) *Fileserver {
 		quitChan:       make(chan struct{}),
 		peers:          make(map[string]p2p.Peer),
 	}
+}
+
+func (server *Fileserver) handleMessage(msg *Message) error {
+	switch v := msg.Payload.(type) {
+	case *Data:
+		server.Logger.Infof("%+v", v)
+	}
+	return nil
 }
 
 func (server *Fileserver) keepAlive() {
@@ -45,9 +55,13 @@ func (server *Fileserver) keepAlive() {
 		select {
 		case msg := <-server.Transport.Consume():
 			server.Logger.Infof("%+v", msg)
-			p := Payload{}
-			if err := gob.NewDecoder(bytes.NewReader(msg.Payload)).Decode(&p); err != nil {
+			var m Message
+			if err := gob.NewDecoder(bytes.NewReader(msg.Payload)).Decode(&m); err != nil {
 				server.Logger.Fatal("Decoding failed")
+			}
+
+			if err := server.handleMessage(&m); err != nil {
+				server.Logger.Errorf("Dial Error : %+v", err)
 			}
 		case <-server.quitChan:
 			return
@@ -75,7 +89,6 @@ func StoreData(key string, r io.Reader) error {
 func (server *Fileserver) Stop() {
 	close(server.quitChan)
 	server.Logger.Info("Fileserver is closed by calling Stop() function")
-	server.Logger.Close()
 }
 
 func (server *Fileserver) Store(key string, r io.Reader) error {
@@ -85,21 +98,28 @@ func (server *Fileserver) Store(key string, r io.Reader) error {
 		return err
 	}
 
-	p := &Payload{
+	data := &Data{
 		Key:  key,
 		Data: buff.Bytes(),
 	}
 
-	return server.broadcast(p)
+	return server.broadcast(&Message{
+		From:    server.Transport.ListenAddr(),
+		Payload: data,
+	})
 }
 
 func (server *Fileserver) bootstrapNetwork() {
 	for _, address := range server.BootStrapNodes {
-		go func() {
+		if len(address) == 0 {
+			continue
+		}
+
+		go func(address string) {
 			if err := server.Transport.Dial(address); err != nil {
 				server.Logger.Errorf("BootStrapping failed for address : %s", address)
 			}
-		}()
+		}(address)
 	}
 }
 
@@ -111,12 +131,12 @@ func (server *Fileserver) OnPeer(p p2p.Peer) error {
 	return nil
 }
 
-func (server *Fileserver) broadcast(p *Payload) error {
+func (server *Fileserver) broadcast(msg *Message) error {
 	peers := []io.Writer{} // peer contains net.conn which contains reader and writer so it is compatible with it.
 	for _, peer := range server.peers {
 		peers = append(peers, peer)
 	}
 
 	multiWriter := io.MultiWriter(peers...)
-	return gob.NewEncoder(multiWriter).Encode(p)
+	return gob.NewEncoder(multiWriter).Encode(msg)
 }

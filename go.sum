@@ -1,4 +1,4 @@
 github.com/go-playground/assert/v2 v2.2.0 h1:JvknZsQTYeFEAhQwI4qEt9cyV5ONwRHC+lYKSsYSR8s=
 github.com/go-playground/assert/v2 v2.2.0/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
-github.com/sumit-behera-in/goLogger v1.2.0 h1:QaQcMhI3GFdo43ze88LxbF5cZZGBMJMkt5UL3RCTcAg=
-github.com/sumit-behera-in/goLogger v1.2.0/go.mod h1:ogt6wdCjzaj3Yp486Fjy4eLWiyNRzHf+wmsMKfpZIiY=
+github.com/sumit-behera-in/goLogger v1.2.1 h1:3x+oLGXf6QEtsOyfmFwjgmfbhLc0succVxCPn5+YM5o=
+github.com/sumit-behera-in/goLogger v1.2.1/go.mod h1:ogt6wdCjzaj3Yp486Fjy4eLWiyNRzHf+wmsMKfpZIiY=

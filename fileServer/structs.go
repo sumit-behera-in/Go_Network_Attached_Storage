@@ -6,7 +6,7 @@ import (
 	"github.com/sumit-behera-in/gonas/storage"
 )
 
-type Payload struct {
+type Data struct {
 	Key  string
 	Data []byte
 }
@@ -17,4 +17,9 @@ type FileServerOpts struct {
 	PathTransformFunc storage.PathTransformFunc // used encrypt path and file name
 	Transport         p2p.Transport             // TCP, UDP, HTTP
 	BootStrapNodes    []string
+}
+
+type Message struct {
+	From    string
+	Payload any
 }
